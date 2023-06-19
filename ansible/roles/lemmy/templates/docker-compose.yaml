@@ -1,0 +1,56 @@
+version: '2'
+
+services:
+  lemmy:
+    image: docker.io/{{ lemmy_docker_image }}
+    ports:
+    - "127.0.0.1:{{ lemmy_port }}:8536"
+    restart: always
+    environment:
+    - RUST_LOG="warn,lemmy_server=info,lemmy_api=info,lemmy_api_common=info,lemmy_api_crud=info,lemmy_apub=info,lemmy_db_queries=info,lemmy_db_schema=info,lemmy_db_views=info,lemmy_db_views_actor=info,lemmy_db_views_moderator=info,lemmy_routes=info,lemmy_utils=info,lemmy_websocket=info"
+    volumes:
+    - ./lemmy.hjson:/config/config.hjson
+    depends_on:
+    - postgres
+    - pictrs
+
+  lemmy-ui:
+    image: docker.io/{{ lemmy_docker_ui_image }}
+    ports:
+    - "127.0.0.1:{{ lemmy_ui_port }}:1234"
+    restart: always
+    environment:
+    - LEMMY_UI_LEMMY_INTERNAL_HOST=lemmy:8536
+    - LEMMY_UI_LEMMY_EXTERNAL_HOST={{ domain }}
+    - LEMMY_UI_HTTPS=true
+    volumes:
+    - ./volumes/lemmy-ui/extra_themes:/app/extra_themes
+    depends_on:
+    - lemmy
+
+  postgres:
+    image: docker.io/postgres:15-alpine
+    environment:
+    - POSTGRES_USER=lemmy
+    - POSTGRES_PASSWORD={{ postgres_password }}
+    - POSTGRES_DB=lemmy
+    volumes:
+    - ./volumes/postgres/pg_data:/var/lib/postgresql/data
+    - ./customPostgresql.conf:/etc/postgresql.conf
+    restart: always
+
+  pictrs:
+    image: docker.io/asonix/pictrs:0.3.1
+    user: 991:991
+    ports:
+    - "127.0.0.1:{{ pictrs_port }}:8080"
+    volumes:
+    - ./volumes/pictrs:/mnt
+    restart: always
+    mem_limit: 690m
+
+  postfix:
+    image: docker.io/mwader/postfix-relay
+    environment:
+    - POSTFIX_myhostname={{ domain }}
+    restart: "always"

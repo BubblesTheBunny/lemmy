@@ -1,0 +1,28 @@
+---
+- name: Install Nginx
+  package:
+    name: nginx
+    state: latest
+- name: Upload base configuration
+  copy:
+    src: default.nginx.conf
+    dest: /etc/nginx/nginx.conf
+    mode: 0640
+    owner: nginx
+    group: nginx
+- name: Upload domain configuration
+  template:
+    src: nginx.conf
+    dest: /etc/nginx/conf.d/{{ domain }}.conf
+    mode: 0640
+    owner: nginx
+    group: nginx
+- name: Allow httpd
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+- name: Start Nginx
+  systemd:
+    name: nginx
+    state: restarted

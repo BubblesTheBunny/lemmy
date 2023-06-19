@@ -1,0 +1,22 @@
+---
+- name: Install Podman deps
+  package:
+    name:
+    - podman
+    - podman-docker
+    state: latest
+- name: Download docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 0740
+- name: Start podman socket
+  systemd:
+    name: podman.socket
+    state: restarted
+- name: Install pip
+  shell: |
+    python -m ensurepip
+- name: Install podman-compose
+  pip:
+    name: podman-compose

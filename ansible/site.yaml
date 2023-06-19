@@ -1,0 +1,8 @@
+---
+- name: Install Lemmy
+  hosts: lemmy
+  roles:
+  - role: cloudflared
+  - role: podman
+  - role: nginx
+  - role: lemmy

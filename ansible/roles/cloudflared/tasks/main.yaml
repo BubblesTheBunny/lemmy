@@ -1,0 +1,3 @@
+---
+- name: Install Cloudflared
+  import_tasks: install_cloudflared.yaml

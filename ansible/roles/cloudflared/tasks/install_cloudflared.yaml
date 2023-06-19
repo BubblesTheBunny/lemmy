@@ -1,0 +1,49 @@
+---
+- name: Add Cloudflare repository
+  yum_repository:
+    name: cloudflare-repo
+    description: Cloudflare Yum Repository
+    baseurl: https://pkg.cloudflare.com/cloudflared/rpm
+    gpgkey: https://pkg.cloudflare.com/cloudflare-main.gpg
+    state: present
+- name: Download Cloudflared
+  dnf:
+    name: cloudflared
+    enablerepo: cloudflare-repo
+    state: present
+- name: Add Cloudflared user
+  user:
+    name: cloudflared
+    comment: For running Cloudflared
+    shell: /bin/false
+    password: '!'
+    home: /etc/cloudflared
+- name: Upload Cloudflared configuration file
+  template:
+    force: true
+    src: cloudflared-config.yaml
+    dest: /etc/cloudflared/config.yaml # TODO: not root?
+    mode: 0640
+    owner: cloudflared
+    group: cloudflared
+- name: Upload Cloudflared credentials file
+  template:
+    src: "{{ tunnel_id }}.json"
+    dest: /etc/cloudflared/{{ tunnel_id }}.json # TODO: not root?
+    mode: 0640
+    owner: cloudflared
+    group: cloudflared
+- name: Check if the Cloudflared service is already installed
+  stat:
+    path: /etc/systemd/system/cloudflared.service
+  register: cloudflared_exists
+- name: Install the Cloudflared service
+  when: not cloudflared_exists.stat.exists
+  become_user: cloudflared
+  command:
+    cmd: cloudflared service install
+- name: Start cloudflared
+  become_user: cloudflared
+  systemd:
+    name: cloudflared
+    state: restarted

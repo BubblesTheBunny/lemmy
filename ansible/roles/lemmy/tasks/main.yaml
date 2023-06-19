@@ -1,0 +1,65 @@
+---
+- name: Create Lemmy folder
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+    state: directory
+  with_items:
+  - path: "{{ lemmy_base_dir }}/{{ domain }}/"
+    owner: root
+  - path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/"
+    owner: root
+  - path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/pictrs/"
+    owner: "991"
+- name: Mount volumes
+  mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    opts: defaults,nofail,discard,noatime
+    fstype: ext4
+    state: mounted
+  with_items:
+  - path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/postgres"
+    src: /dev/disk/by-label/postgres
+  - path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/lemmy-ui"
+    src: /dev/disk/by-label/lemmy-ui
+  - path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/pictrs"
+    src: /dev/disk/by-label/pictrs
+- name: Create data dir for Postgres
+  file:
+    path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/postgres/pgdata"
+    state: directory
+- name: Upload docker-compose file
+  template:
+    src: docker-compose.yaml
+    dest: "{{ lemmy_base_dir }}/{{ domain }}/docker-compose.yaml"
+    mode: "0600"
+- name: Upload lemmy.hjson
+  template:
+    src: lemmy.hjson
+    dest: "{{ lemmy_base_dir }}/{{ domain }}/lemmy.hjson"
+    mode: "0600"
+- name: Upload customPostgresql.conf
+  copy:
+    src: customPostgresql.conf
+    dest: "{{ lemmy_base_dir }}/{{ domain }}/customPostgresql.conf"
+    mode: "0600"
+- name: Set SEContext for volumes
+  sefcontext:
+    target: "{{ item.target }}"
+    setype: svirt_sandbox_file_t
+    state: present
+  with_items:
+  - target: "{{ lemmy_base_dir }}/{{ domain }}/volumes/postgres/pgdata(/.*)?"
+  - target: "{{ lemmy_base_dir }}/{{ domain }}/volumes/lemmy-ui(/.*)?"
+  - target: "{{ lemmy_base_dir }}/{{ domain }}/volumes/pictrs(/.*)?"
+  - target: "{{ lemmy_base_dir }}/{{ domain }}/lemmy.hjson"
+  - target: "{{ lemmy_base_dir }}/{{ domain }}/customPostgresql.conf"
+- name: Run restorecon
+  shell: restorecon -Rv {{ lemmy_base_dir }}/{{ domain }}
+- name: Start containers
+  shell:
+    cmd: |
+      podman-compose up -d
+    chdir: "{{ lemmy_base_dir }}/{{ domain }}/"
