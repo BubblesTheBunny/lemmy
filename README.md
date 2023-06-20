@@ -8,7 +8,7 @@ Requirements:
 * [DigitalOcean account](https://www.digitalocean.com/)
 * [A Domain on Cloudflare](https://www.cloudflare.com/)
 
-To populate the required environment variables I use a `.secrets` and a `.tunnels` file
+To populate the required environment variables I use a `.secrets` and a `.tunnel` file
 
 example `.secrets`
 
@@ -21,7 +21,7 @@ export TF_VAR_environment=development
 export TF_VAR_postgres_password=<your postgres password>
 ```
 
-example `.tunnels`
+example `.tunnel`
 
 ```shell
 export TF_VAR_tunnel_secret=`hexdump -vn32 -e'4/4 "%08X"' /dev/urandom | base64 -w0 -`
@@ -31,7 +31,7 @@ export TF_VAR_tunnel_secret=`hexdump -vn32 -e'4/4 "%08X"' /dev/urandom | base64 
 
 ```shell
 source ./.secrets
-source ./.tunnels
+source ./.tunnel
 ./run.sh
 ```
 

@@ -2,7 +2,7 @@
 
 export TF_IN_AUTOMATION=true
 
-ssh-keygen -t ed25519 -N "" -f server-ssh -C "root@bubblesthebunny"
+ssh-keygen -t ed25519 -N "" -f server-ssh -C "root@lemmy"
 ssh-keygen -t ed25519 -N "" -f bastion-ssh -C "root@bastion"
 
 terraform init || exit

@@ -1,6 +1,6 @@
 ---
 - name: Install Lemmy
-  hosts: lemmy
+  hosts: lemmyserver
   roles:
   - role: cloudflared
   - role: podman

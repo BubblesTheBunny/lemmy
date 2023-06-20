@@ -85,8 +85,8 @@ resource "digitalocean_droplet" "bastion" {
 
 resource "digitalocean_droplet" "lemmy" {
   image    = "rockylinux-9-x64"
-  name     = "lemmy"
-  size     = data.digitalocean_sizes.default.sizes[0].slug
+  name     = "lemmyserver"
+  size     = data.digitalocean_sizes.default.sizes[1].slug
   vpc_uuid = digitalocean_vpc.lemmy_vpc.id
   ssh_keys = [digitalocean_ssh_key.server-ssh.fingerprint]
   region   = "nyc3"
@@ -202,7 +202,7 @@ resource "local_file" "hosts_yaml" {
   all:
     hosts:
       bastion:
-      lemmy:
+      lemmyserver:
         domain: ${var.domain}
         tunnel_id: ${cloudflare_tunnel.lemmy.id}
         tunnel_secret: ${var.tunnel_secret}
@@ -228,7 +228,7 @@ resource "local_file" "ssh_config" {
     IdentityFile = ../bastion-ssh
     User root
 
-  Host lemmy
+  Host lemmyserver
     HostName ${digitalocean_droplet.lemmy.ipv4_address_private}
     Port 22
     IdentityFile = ../server-ssh
