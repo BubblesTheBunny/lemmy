@@ -8,6 +8,13 @@ Requirements:
 * [DigitalOcean account](https://www.digitalocean.com/)
 * [A Domain on Cloudflare](https://www.cloudflare.com/)
 
+## Volumes
+
+Volumes are created through a distinct path to allow ripping apart
+the infrastructure without losing any data. [volumes](./volumes)
+
+## Example
+
 To populate the required environment variables I use a `.secrets` and a `.tunnel` file
 
 example `.secrets`
@@ -27,11 +34,13 @@ example `.tunnel`
 export TF_VAR_tunnel_secret=`hexdump -vn32 -e'4/4 "%08X"' /dev/urandom | base64 -w0 -`
 ```
 
-## Example
-
 ```shell
+export TF_VAR_domain=<your domain>
 source ./.secrets
 source ./.tunnel
+cd volumes
+./run.sh
+cd -
 ./run.sh
 ```
 
