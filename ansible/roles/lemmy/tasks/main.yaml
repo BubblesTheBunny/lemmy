@@ -58,6 +58,11 @@
   - target: "{{ lemmy_base_dir }}/{{ domain }}/customPostgresql.conf"
 - name: Run restorecon
   shell: restorecon -Rv {{ lemmy_base_dir }}/{{ domain }}
+- name: Shut down containers if they're running
+  shell:
+    cmd: |
+      podman-compose down
+    chdir: "{{ lemmy_base_dir }}/{{ domain }}/"
 - name: Start containers
   shell:
     cmd: |
