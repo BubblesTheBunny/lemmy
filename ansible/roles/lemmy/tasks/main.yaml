@@ -28,7 +28,7 @@
     src: /dev/disk/by-label/pictrs
 - name: Create data dir for Postgres
   file:
-    path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/postgres/pgdata"
+    path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/postgres/pg_data"
     state: directory
 - name: Upload docker-compose file
   template:
@@ -51,7 +51,7 @@
     setype: svirt_sandbox_file_t
     state: present
   with_items:
-  - target: "{{ lemmy_base_dir }}/{{ domain }}/volumes/postgres/pgdata(/.*)?"
+  - target: "{{ lemmy_base_dir }}/{{ domain }}/volumes/postgres/pg_data(/.*)?"
   - target: "{{ lemmy_base_dir }}/{{ domain }}/volumes/lemmy-ui(/.*)?"
   - target: "{{ lemmy_base_dir }}/{{ domain }}/volumes/pictrs(/.*)?"
   - target: "{{ lemmy_base_dir }}/{{ domain }}/lemmy.hjson"
