@@ -27,7 +27,7 @@ variable "tunnel_secret" {
 variable "lemmy_version" {
   type        = string
   description = "The version of Lemmy to install"
-  default     = "0.17.4"
+  default     = "0.18.0"
 }
 
 variable "postgres_password" {
